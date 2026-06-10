@@ -1,0 +1,50 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Sprint 1 - Contrato de Interface
+      id: sprint-1-contrato-de-interface
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Sprint 1 - Contrato de Interface
+        setup-command: npm install
+        command: npm run test:sprint1
+        timeout: 5
+        max-score: 2
+    - name: Sprint 2 - Lógica de Retirada
+      id: sprint-2-logica-de-retirada
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Sprint 2 - Lógica de Retirada
+        setup-command: ''
+        command: npm run test:sprint2
+        timeout: 5
+        max-score: 2
+    - name: Sprint 3 - Dashboard e Segurança
+      id: sprint-3-dashboard-e-seguranca
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Sprint 3 - Dashboard e Segurança
+        setup-command: ''
+        command: npm run test:sprint3
+        timeout: 5
+        max-score: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        SPRINT-1-CONTRATO-DE-INTERFACE_RESULTS: "${{steps.sprint-1-contrato-de-interface.outputs.result}}"
+        SPRINT-2-LOGICA-DE-RETIRADA_RESULTS: "${{steps.sprint-2-logica-de-retirada.outputs.result}}"
+        SPRINT-3-DASHBOARD-E-SEGURANCA_RESULTS: "${{steps.sprint-3-dashboard-e-seguranca.outputs.result}}"
+      with:
+        runners: sprint-1-contrato-de-interface,sprint-2-logica-de-retirada,sprint-3-dashboard-e-seguranca
