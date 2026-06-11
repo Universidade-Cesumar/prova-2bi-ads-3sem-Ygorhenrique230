@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Almoxarifado · Controle de Estoque</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">🏥</div>
+  <h1>Almoxarifado <span>· Enfermagem</span></h1>
+  <div class="badge" id="clock"></div>
+</header>
+
+<main>
+
+  <aside>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">📦</div>
+        <div><h2>Cadastrar Material</h2></div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label for="input-nome">Nome do Material</label>
+          <input type="text" id="input-nome" placeholder="Ex: Seringa 10ml" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label for="input-quantidade">Quantidade</label>
+          <input type="number" id="input-quantidade" placeholder="0" min="0"/>
+        </div>
+        <div class="field">
+          <label for="input-categoria">Categoria</label>
+          <select id="input-categoria">
+            <option value="Consumo">Consumo (descartável)</option>
+            <option value="Permanente">Permanente (equipamento)</option>
+          </select>
+        </div>
+        <button id="btn-cadastrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Cadastrar
+        </button>
+        <div class="msg" id="msg"></div>
+      </div>
+    </div>
+  </aside>
+
+  <section>
+    <div class="stats">
+      <div class="stat">
+        <div class="val" id="stat-total">—</div>
+        <div class="lbl">Itens cadastrados</div>
+      </div>
+      <div class="stat alert-stat">
+        <div class="val" id="stat-baixo">—</div>
+        <div class="lbl">Estoque baixo</div>
+      </div>
+      <div class="stat zero-stat">
+        <div class="val" id="stat-zero">—</div>
+        <div class="lbl">Zerados</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">📋</div>
+        <h2>Materiais em Estoque</h2>
+      </div>
+      <div class="card-body" style="padding: 16px 18px;">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="search-input" placeholder="Buscar material…"/>
+          </div>
+          <button onclick="carregarMateriais()" style="
+            padding: 9px 14px; background: var(--navy); color:#fff;
+            border:none; border-radius:8px; cursor:pointer;
+            font-family: var(--font-head); font-size:.8rem; font-weight:600;
+            display:flex; align-items:center; gap:6px; white-space:nowrap;
+          ">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Atualizar
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Categoria</th>
+                <th style="min-width:140px">Quantidade</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="lista-materiais">
+              <tr><td colspan="5"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
