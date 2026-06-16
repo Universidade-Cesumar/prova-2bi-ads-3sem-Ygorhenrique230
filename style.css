@@ -330,4 +330,4 @@ tbody tr:hover { background: #F8FAFB; }
 }
 @media (max-width: 500px) {
   .stats { grid-template-columns: 1fr 1fr; }
-}/* Caso queira utilizar framework como Bootstrap para estilização, pode utilizar. Basta ignoar esse arquivo */
+}
