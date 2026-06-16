@@ -73,7 +73,7 @@ main {
   gap: 24px;
   padding: 28px;
   flex: 1;
-  max-width: 1200px;
+  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
 }
@@ -294,17 +294,60 @@ tbody tr:hover { background: #F8FAFB; }
 .qty-bar-fill.baixo { background: var(--amber); }
 .qty-bar-fill.zero  { background: var(--red); }
 
-.btn-del {
+.retirada-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-retirada {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: .83rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .15s;
+  text-align: center;
+}
+.input-retirada:focus {
+  border-color: var(--navy-mid);
+  background: #fff;
+}
+
+.btn-baixar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-family: var(--font-head);
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, transform .1s;
+}
+.btn-baixar:hover  { background: #3a8a6e; }
+.btn-baixar:active { transform: scale(.96); }
+
+.btn-excluir {
   background: none;
   border: none;
   cursor: pointer;
   color: var(--muted);
-  padding: 4px;
+  padding: 5px;
   border-radius: 5px;
   transition: color .15s, background .15s;
   line-height: 0;
 }
-.btn-del:hover { color: var(--red); background: var(--red-lt); }
+.btn-excluir:hover { color: var(--red); background: var(--red-lt); }
 
 .empty-state {
   text-align: center;
