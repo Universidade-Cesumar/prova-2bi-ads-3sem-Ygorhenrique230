@@ -9,6 +9,8 @@
   --amber-lt:#FEF3C7;
   --red:     #EF4444;
   --red-lt:  #FEE2E2;
+  --purple:  #8B5CF6;
+  --purple-lt:#EDE9FE;
   --bg:      #F0F4F8;
   --surface: #FFFFFF;
   --border:  #D1D9E0;
@@ -73,7 +75,7 @@ main {
   gap: 24px;
   padding: 28px;
   flex: 1;
-  max-width: 1280px;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
 }
@@ -170,7 +172,7 @@ main {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -197,16 +199,19 @@ main {
 }
 .stat.alert-stat .val { color: var(--amber); }
 .stat.zero-stat  .val { color: var(--red); }
+.stat.venc-stat  .val { color: var(--purple); }
 
 .toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 .search-wrap {
   position: relative;
   flex: 1;
+  min-width: 160px;
 }
 .search-wrap svg {
   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
@@ -266,9 +271,13 @@ tbody tr:hover { background: #F8FAFB; }
   font-size: .72rem;
   font-weight: 600;
 }
-.pill.ok     { background: var(--sage-lt); color: #1f6b54; }
-.pill.baixo  { background: var(--amber-lt); color: #92400e; }
-.pill.zero   { background: var(--red-lt);   color: #991b1b; }
+.pill.ok      { background: var(--sage-lt);   color: #1f6b54; }
+.pill.baixo   { background: var(--amber-lt);  color: #92400e; }
+.pill.zero    { background: var(--red-lt);    color: #991b1b; }
+.pill.vencido { background: var(--purple-lt); color: #5b21b6; }
+.pill.proximo { background: var(--amber-lt);  color: #92400e; }
+.pill.valido  { background: var(--sage-lt);   color: #1f6b54; }
+.pill.sem-val { background: #F3F4F6;          color: var(--muted); }
 .pill::before {
   content: '';
   width: 6px; height: 6px;
@@ -349,6 +358,9 @@ tbody tr:hover { background: #F8FAFB; }
 }
 .btn-excluir:hover { color: var(--red); background: var(--red-lt); }
 
+tbody tr.row-vencido { background: #FAF5FF; }
+tbody tr.row-vencido:hover { background: #F3E8FF; }
+
 .empty-state {
   text-align: center;
   padding: 48px 20px;
@@ -367,9 +379,18 @@ tbody tr:hover { background: #F8FAFB; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@media (max-width: 860px) {
+.fornecedor-text {
+  font-size: .8rem;
+  color: var(--muted);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1024px) {
   main { grid-template-columns: 1fr; padding: 16px; }
-  .stats { grid-template-columns: repeat(3, 1fr); }
+  .stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 500px) {
   .stats { grid-template-columns: 1fr 1fr; }
