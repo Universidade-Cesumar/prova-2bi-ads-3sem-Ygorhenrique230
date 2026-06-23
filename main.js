@@ -13,7 +13,7 @@ let todosOsMateriais = [];
 
 async function carregarMateriais() {
   const tbody = document.getElementById('lista-materiais');
-  tbody.innerHTML = '<tr><td colspan="6"><div class="spinner"></div></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8"><div class="spinner"></div></td></tr>';
   try {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error();
@@ -21,7 +21,7 @@ async function carregarMateriais() {
     renderizarTabela(todosOsMateriais);
     atualizarStats(todosOsMateriais);
   } catch {
-    tbody.innerHTML = `<tr><td colspan="6">
+    tbody.innerHTML = `<tr><td colspan="8">
       <div class="empty-state">
         <div class="icon-lg">⚠️</div>
         <p>Não foi possível conectar à API.<br>Verifique a URL da MockAPI no código.</p>
@@ -31,9 +31,9 @@ async function carregarMateriais() {
 
 function getStatus(qtd) {
   const q = Number(qtd);
-  if (q === 0) return { cls: 'zero',  label: 'Zerado' };
-  if (q <= 5)  return { cls: 'baixo', label: 'Baixo'  };
-  return             { cls: 'ok',    label: 'OK'     };
+  if (q === 0)  return { cls: 'zero',  label: 'Zerado' };
+  if (q <= 10)  return { cls: 'baixo', label: 'Baixo'  };
+  return              { cls: 'ok',    label: 'OK'     };
 }
 
 function getBarWidth(qtd) {
@@ -42,10 +42,28 @@ function getBarWidth(qtd) {
   return Math.min(100, (q / 100) * 100);
 }
 
+function getValidadeStatus(validade) {
+  if (!validade) return { cls: 'sem-val', label: '—' };
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const venc = new Date(validade + 'T00:00:00');
+  const diffDias = Math.floor((venc - hoje) / (1000 * 60 * 60 * 24));
+
+  if (diffDias < 0)   return { cls: 'vencido', label: 'Vencido' };
+  if (diffDias <= 30) return { cls: 'proximo',  label: `${diffDias}d` };
+  return                     { cls: 'valido',   label: formatarData(validade) };
+}
+
+function formatarData(iso) {
+  if (!iso) return '—';
+  const [ano, mes, dia] = iso.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
 function renderizarTabela(lista) {
   const tbody = document.getElementById('lista-materiais');
   if (!lista.length) {
-    tbody.innerHTML = `<tr><td colspan="6">
+    tbody.innerHTML = `<tr><td colspan="8">
       <div class="empty-state">
         <div class="icon-lg">📭</div>
         <p>Nenhum material cadastrado ainda.<br>Use o formulário ao lado para começar.</p>
@@ -53,12 +71,16 @@ function renderizarTabela(lista) {
     return;
   }
   tbody.innerHTML = lista.map(m => {
-    const st = getStatus(m.quantidade);
-    const bw = getBarWidth(m.quantidade);
+    const st  = getStatus(m.quantidade);
+    const bw  = getBarWidth(m.quantidade);
+    const val = getValidadeStatus(m.validade);
+    const rowClass = val.cls === 'vencido' ? ' class="row-vencido"' : '';
+
     return `
-    <tr>
+    <tr${rowClass}>
       <td><span class="item-name">${escHtml(m.nome)}</span></td>
       <td><span style="font-size:.8rem;color:var(--muted)">${escHtml(m.categoria || '—')}</span></td>
+      <td><span class="fornecedor-text" title="${escHtml(m.fornecedor || '')}">${escHtml(m.fornecedor || '—')}</span></td>
       <td>
         <div class="qty-bar-wrap">
           <span class="qty-num">${m.quantidade}</span>
@@ -68,6 +90,9 @@ function renderizarTabela(lista) {
         </div>
       </td>
       <td><span class="pill ${st.cls}">${st.label}</span></td>
+      <td>
+        <span class="pill ${val.cls}" title="${m.validade ? formatarData(m.validade) : ''}">${val.label}</span>
+      </td>
       <td>
         <div class="retirada-wrap">
           <input
@@ -104,9 +129,9 @@ function renderizarTabela(lista) {
 
   tbody.querySelectorAll('.btn-baixar').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id      = btn.dataset.id;
-      const estoque = Number(btn.dataset.estoque);
-      const input   = btn.closest('tr').querySelector('.input-retirada');
+      const id       = btn.dataset.id;
+      const estoque  = Number(btn.dataset.estoque);
+      const input    = btn.closest('tr').querySelector('.input-retirada');
       const retirada = Number(input.value);
       confirmarBaixa(id, estoque, retirada, input);
     });
@@ -120,9 +145,15 @@ function renderizarTabela(lista) {
 function atualizarStats(lista) {
   document.getElementById('stat-total').textContent = lista.length;
   document.getElementById('stat-baixo').textContent =
-    lista.filter(m => Number(m.quantidade) > 0 && Number(m.quantidade) <= 5).length;
+    lista.filter(m => Number(m.quantidade) > 0 && Number(m.quantidade) <= 10).length;
   document.getElementById('stat-zero').textContent =
     lista.filter(m => Number(m.quantidade) === 0).length;
+  document.getElementById('stat-vencido').textContent =
+    lista.filter(m => {
+      if (!m.validade) return false;
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      return new Date(m.validade + 'T00:00:00') < hoje;
+    }).length;
 }
 
 function validarRetirada(estoqueAtual, quantidadeRetirada) {
@@ -171,10 +202,45 @@ async function excluirMaterial(id) {
   }
 }
 
+function exportarCSV() {
+  if (!todosOsMateriais.length) {
+    alert('Nenhum material para exportar.');
+    return;
+  }
+
+  const cabecalho = ['Nome', 'Categoria', 'Fornecedor', 'Quantidade', 'Status', 'Validade'];
+  const linhas = todosOsMateriais.map(m => {
+    const st  = getStatus(m.quantidade);
+    const val = m.validade ? formatarData(m.validade) : '—';
+    return [
+      `"${(m.nome       || '').replace(/"/g, '""')}"`,
+      `"${(m.categoria  || '').replace(/"/g, '""')}"`,
+      `"${(m.fornecedor || '').replace(/"/g, '""')}"`,
+      m.quantidade,
+      st.label,
+      val
+    ].join(',');
+  });
+
+  const csv = [cabecalho.join(','), ...linhas].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  a.download = `estoque_almoxarifado_${hoje}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 document.getElementById('btn-cadastrar').addEventListener('click', async () => {
-  const nome      = document.getElementById('input-nome').value.trim();
+  const nome       = document.getElementById('input-nome').value.trim();
   const quantidade = document.getElementById('input-quantidade').value;
   const categoria  = document.getElementById('input-categoria').value;
+  const fornecedor = document.getElementById('input-fornecedor').value.trim();
+  const validade   = document.getElementById('input-validade').value;
   const msg        = document.getElementById('msg');
   const btn        = document.getElementById('btn-cadastrar');
 
@@ -194,11 +260,19 @@ document.getElementById('btn-cadastrar').addEventListener('click', async () => {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, quantidade: Number(quantidade), categoria })
+      body: JSON.stringify({
+        nome,
+        quantidade: Number(quantidade),
+        categoria,
+        fornecedor,
+        validade
+      })
     });
     if (!res.ok) throw new Error();
-    document.getElementById('input-nome').value      = '';
-    document.getElementById('input-quantidade').value = '';
+    document.getElementById('input-nome').value       = '';
+    document.getElementById('input-quantidade').value  = '';
+    document.getElementById('input-fornecedor').value  = '';
+    document.getElementById('input-validade').value    = '';
     msg.textContent = '✓ Material cadastrado com sucesso!';
     msg.className   = 'msg success';
     carregarMateriais();
@@ -213,7 +287,10 @@ document.getElementById('btn-cadastrar').addEventListener('click', async () => {
 
 document.getElementById('search-input').addEventListener('input', e => {
   const q = e.target.value.toLowerCase();
-  const filtrado = todosOsMateriais.filter(m => m.nome.toLowerCase().includes(q));
+  const filtrado = todosOsMateriais.filter(m =>
+    m.nome.toLowerCase().includes(q) ||
+    (m.fornecedor || '').toLowerCase().includes(q)
+  );
   renderizarTabela(filtrado);
 });
 
